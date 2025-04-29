@@ -1,29 +1,19 @@
-// const express = require('express');
-// const router = express.Router();
-// const authMiddleware = require("./middleware/authMiddleWare");
+const express = require('express');
+const router = express.Router();
+const authMiddleWare = require('./middleware/auth');
+const signController = require('./api/sign/controller');
+router.post('/sign',signController.signUp);
 
-// const commnetController = require('./api/comment/controller');
+const loginController = require('./api/login/controller');
+router.post('/login',loginController.login);
 
-// router.post('/comment/add',authMiddleware,commnetController.add);
-// router.post('/comment/list',authMiddleware,commnetController.list);
+const userController = require('./api/user/controller');
+router.get('/getUser',authMiddleWare,userController.getUser);
 
-// const boardController = require('./api/board/controller');
+const exerciseController =require('./api/exercise/controller');
+router.get('/exercise',authMiddleWare,exerciseController.getExercise);
+router.post('/exercise/search',authMiddleWare,exerciseController.SearchExercise);
+router.post('/exercise/comment',authMiddleWare,exerciseController.commentsExercise);
+router.post('/exercise/getComment',authMiddleWare,exerciseController.getCommentExercise);
 
-// router.post('/board/add',authMiddleware,boardController.add);
-// router.get('/board/list',authMiddleware,boardController.list);
-// router.post('/board/detail',authMiddleware,boardController.detail);
-
-// const loginController = require('./api/login/controller');
-
-// router.post('/login',loginController.login);
-// router.post('/logout',loginController.logout);
-
-// const signController = require('./api/signup/controller');
-
-// router.post('/signUp',signController.signUp);
-
-// const userController = require('./api/user/controller');
-
-// router.post('/user',authMiddleware,userController.user);
-
-// module.exports= router;
+module.exports= router;
