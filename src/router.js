@@ -16,4 +16,11 @@ router.post('/exercise/search',authMiddleWare,exerciseController.SearchExercise)
 router.post('/exercise/comment',authMiddleWare,exerciseController.commentsExercise);
 router.post('/exercise/getComment',authMiddleWare,exerciseController.getCommentExercise);
 
+const routineController = require('./api/routine/controller');
+router.post('/routine/routines',authMiddleWare,routineController.getRoutines);
+router.post('/routine/search',authMiddleWare,routineController.Searchroutine);
+router.post('/routine/detail',authMiddleWare,routineController.routineDetail);
+router.post('/routine/comment',routineController.commentRoutine);
+router.post('/routine/getcomment',routineController.getCommentRoutine);
+
 module.exports= router;
