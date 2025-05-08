@@ -9,6 +9,11 @@ router.post('/login',loginController.login);
 
 const userController = require('./api/user/controller');
 router.get('/getUser',authMiddleWare,userController.getUser);
+router.post('/updatePhsical',authMiddleWare,userController.updateUserPhysical);
+router.post('/updatepassword',authMiddleWare,userController.updateUserPassword);
+router.post('/update/IsRoutine',authMiddleWare,userController.toggleIsRoutine);
+router.post('/update/IsWorkout',authMiddleWare,userController.toggleIsWorkout);
+router.get('/status',authMiddleWare,userController.getVisibilityStatus);
 
 const exerciseController =require('./api/exercise/controller');
 router.get('/exercise',authMiddleWare,exerciseController.getExercise);
@@ -23,4 +28,6 @@ router.post('/routine/detail',authMiddleWare,routineController.routineDetail);
 router.post('/routine/comment',routineController.commentRoutine);
 router.post('/routine/getcomment',routineController.getCommentRoutine);
 
+const memberController = require('./api/member/controller');
+router.post('/member/getMemberInfo',authMiddleWare,memberController.getMemberInfo);
 module.exports= router;
