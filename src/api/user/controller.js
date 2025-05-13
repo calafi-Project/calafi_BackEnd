@@ -75,9 +75,10 @@ exports.toggleIsRoutine = async (req, res) => {
 
   try {
     const [row] = await repository.getRoutineFlag(userId);
+    console.log(row);
     if (!row) return res.status(404).json({ message: "userAct 정보 없음" });
 
-    const newValue = !row.is_routine;
+    const newValue = !row.isroutine;
     await repository.updateRoutineFlag(userId, newValue);
     res.json({ message: "is_routine 값이 변경되었습니다.", is_routine: newValue });
   } catch (err) {
@@ -93,7 +94,7 @@ exports.toggleIsWorkout = async (req, res) => {
     const [row] = await repository.getWorkoutFlag(userId);
     if (!row) return res.status(404).json({ message: "userAct 정보 없음" });
 
-    const newValue = !row.is_workout;
+    const newValue = !row.isworkout;
     await repository.updateWorkoutFlag(userId, newValue);
     res.json({ message: "is_workout 값이 변경되었습니다.", is_workout: newValue });
   } catch (err) {
@@ -102,14 +103,15 @@ exports.toggleIsWorkout = async (req, res) => {
   }
 };
 
-exports.getVisibilityStatus = async (req, res) => {
+exports.getState = async (req, res) => {
   const userId = req.user.id;
-
+  console.log(userId);
+  
   try {
     const [row] = await repository.getVisibilityFlags(userId);
     if (!row) return res.status(404).json({ message: "userAct 정보 없음" });
 
-    res.json({ is_routine: row.is_routine, is_workout: row.is_workout });
+    res.json(row);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "서버 오류", error: err });
