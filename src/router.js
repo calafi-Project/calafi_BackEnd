@@ -28,4 +28,11 @@ router.post('/routine/detail',authMiddleWare,routineController.routineDetail);
 router.post('/routine/comment',routineController.commentRoutine);
 router.post('/routine/getcomment',routineController.getCommentRoutine);
 
+const followController = require('./api/follow/controller');
+router.post('/follow/follow',authMiddleWare,followController.follow);
+router.post('/follow/unfollow',authMiddleWare,followController.unfollow);
+router.get('/follow/getfollowing',authMiddleWare,followController.getfollowing);
+router.get('/follow/getfollow',authMiddleWare,followController.getfollow);
+router.post('/follow/isFollowing',authMiddleWare,followController.isFollowing);
+
 module.exports= router;
