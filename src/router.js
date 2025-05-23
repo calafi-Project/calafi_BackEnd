@@ -35,4 +35,7 @@ router.get('/follow/getfollowing',authMiddleWare,followController.getfollowing);
 router.get('/follow/getfollow',authMiddleWare,followController.getfollow);
 router.post('/follow/isFollowing',authMiddleWare,followController.isFollowing);
 
+const searchController = require('./api/search/controller');
+router.post('/search',authMiddleWare,searchController.allSearch);
+
 module.exports= router;
