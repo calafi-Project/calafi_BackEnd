@@ -73,3 +73,49 @@ exports.getCommentRoutine = async (routine_id) => {
   `;
   return await pool.query(query, [routine_id]);
 };
+
+exports.likeRoutine = async (userId,routineId)=>{
+  const query = `
+  INSERT IGNORE INTO routine_likes (user_id, routine_id) VALUES (?, ?)
+  `;
+  return await pool.query(query, [userId,routineId]);
+}
+
+exports.updateHeart = async (routineId)=>{
+  console.log(routineId);
+  const query = `
+  UPDATE routines SET likes = likes + 1 WHERE id = ?
+  `;
+  return await pool.query(query, [routineId]);
+}
+
+exports.deleteHeart = async (userId, routineId)=>{
+  const query = `
+  DELETE FROM routine_likes WHERE user_id = ? AND routine_id = ?
+  `;
+  return await pool.query(query, [userId,routineId]);
+}
+
+exports.deletelike = async (routineId)=>{
+  const query = `
+  UPDATE routines SET likes = likes - 1 WHERE id = ? AND likes > 0
+  `;
+  return await pool.query(query, [routineId]);
+}
+
+exports.joinLike = async (userId)=>{
+  const query = `
+  SELECT id, name, description, tags, likes, created_at FROM routines WHERE user_id = ?
+  `;
+  return await pool.query(query, [userId]);
+}
+
+exports.joinlikeRoutine = async (userId)=>{
+  const query = `
+  SELECT r.id, r.name, r.description, r.tags, r.likes, r.created_at
+     FROM routine_likes rl
+     JOIN routines r ON rl.routine_id = r.id
+     WHERE rl.user_id = ?
+  `;
+  return await pool.query(query, [userId]);
+}

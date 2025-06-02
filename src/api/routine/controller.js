@@ -61,3 +61,57 @@ exports.getCommentRoutine = async (req, res) => {
       res.status(500).json({ error: err.message });  // 오류 발생 시 응답
   }
 };
+
+exports.likeRoutine = async (req,res)=>{
+  const userId = req.user.id;
+  const {routineId} = req.body;
+  
+  try{
+    // 중복 좋아요 방지 위해 INSERT IGNORE 또는 존재 여부 체크 후 삽입 가능
+    const result = await repository.likeRoutine(userId,routineId);
+    console.log(result);
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ message: '이미 좋아요한 루틴입니다.' });
+    }
+    await repository.updateHeart(routineId);
+    res.json({ message: '좋아요 완료' });
+  }catch(err){
+    res.json(err);
+  }
+}
+
+exports.unlikeRoutine =async (req,res)=>{
+  const userId = req.user.id;
+  const {routineId} = req.body;
+
+  try{
+    const result = await repository.deleteHeart(userId,routineId);
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ message: '좋아요하지 않은 루틴입니다.' });
+    }
+    await repository.deletelike(routineId);
+    res.json({message:'좋아요 취소 완료'});
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류' });
+  }
+}
+
+exports.joinLike = async (req,res)=>{
+  const {userId} = req.body;
+
+  try{
+    const created = await repository.joinLike(userId);
+    const liked = await repository.joinlikeRoutine(userId);
+    res.json({
+      created_routines: created,
+      liked_routines: liked,
+    });
+  }catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류' });
+  }
+}
+

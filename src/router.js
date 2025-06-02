@@ -27,6 +27,9 @@ router.post('/routine/search',authMiddleWare,routineController.Searchroutine);
 router.post('/routine/detail',authMiddleWare,routineController.routineDetail);
 router.post('/routine/comment',routineController.commentRoutine);
 router.post('/routine/getcomment',routineController.getCommentRoutine);
+router.post('/routine/like',authMiddleWare,routineController.likeRoutine);
+router.post('/routine/unlike',authMiddleWare,routineController.unlikeRoutine);
+router.post('/routine/joinRoutine',authMiddleWare,routineController.joinLike);
 
 const followController = require('./api/follow/controller');
 router.post('/follow/follow',authMiddleWare,followController.follow);
