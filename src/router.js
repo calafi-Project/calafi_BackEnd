@@ -20,6 +20,9 @@ router.get('/exercise',authMiddleWare,exerciseController.getExercise);
 router.post('/exercise/search',authMiddleWare,exerciseController.SearchExercise);
 router.post('/exercise/comment',authMiddleWare,exerciseController.commentsExercise);
 router.post('/exercise/getComment',authMiddleWare,exerciseController.getCommentExercise);
+router.post('/exercise/addExSc',authMiddleWare,exerciseController.addExerciseToSchedule);
+router.post('/exercise/reExSc',authMiddleWare,exerciseController.removeExerciseFromSchedule);
+router.post('/exercise/getExSc',authMiddleWare,exerciseController.getMyExerciseSchedule);
 
 const routineController = require('./api/routine/controller');
 router.post('/routine/routines',authMiddleWare,routineController.getRoutines);
@@ -30,6 +33,9 @@ router.post('/routine/getcomment',routineController.getCommentRoutine);
 router.post('/routine/like',authMiddleWare,routineController.likeRoutine);
 router.post('/routine/unlike',authMiddleWare,routineController.unlikeRoutine);
 router.post('/routine/joinRoutine',authMiddleWare,routineController.joinLike);
+router.post('/routine/addRoSc', authMiddleWare,routineController.addRoutineToSchedule);
+router.delete('/routine/reRoSc',authMiddleWare, routineController.removeRoutineFromSchedule);
+router.get('/routine/getRoSc',authMiddleWare, routineController.getRoutinesByWeekday);
 
 const followController = require('./api/follow/controller');
 router.post('/follow/follow',authMiddleWare,followController.follow);

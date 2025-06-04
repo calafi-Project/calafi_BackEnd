@@ -119,3 +119,26 @@ exports.joinlikeRoutine = async (userId)=>{
   `;
   return await pool.query(query, [userId]);
 }
+exports.addSchedule = async (userId, routineId, weekday) => {
+  const query = `
+    INSERT INTO weekly_routines (user_id, routine_id, weekday)
+    VALUES (?, ?, ?)
+  `;
+  return await pool.query(query, [userId, routineId, weekday]);
+};
+exports.removeSchedule = async (userId, routineId, weekday) => {
+  const query = `
+    DELETE FROM weekly_routines
+    WHERE user_id = ? AND routine_id = ? AND weekday = ?
+  `;
+  return await pool.query(query, [userId, routineId, weekday]);
+};
+exports.getRoutinesByWeekday = async (userId, weekday) => {
+  const query = `
+    SELECT r.*
+    FROM weekly_routines wr
+    JOIN routines r ON wr.routine_id = r.id
+    WHERE wr.user_id = ? AND wr.weekday = ?
+  `;
+  return await pool.query(query, [userId, weekday]);
+};

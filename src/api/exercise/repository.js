@@ -31,3 +31,29 @@ exports.getCommentExercise = async(exercise_id)=>{
   `;
   return await pool.query(query,[exercise_id]);
 }
+
+exports.addExerciseSchedule = async (userId, videoId) => {
+  const query = `
+    INSERT IGNORE INTO user_exercise_schedule (user_id, video_id)
+    VALUES (?, ?)
+  `;
+  return await pool.query(query, [userId, videoId]);
+};
+
+exports.removeExerciseSchedule = async (userId, videoId) => {
+  const query = `
+    DELETE FROM user_exercise_schedule
+    WHERE user_id = ? AND video_id = ?
+  `;
+  return await pool.query(query, [userId, videoId]);
+};
+
+exports.getMyExerciseSchedule = async (userId) => {
+  const query = `
+    SELECT ev.*
+    FROM user_exercise_schedule ues
+    JOIN exercise_videos ev ON ues.video_id = ev.id
+    WHERE ues.user_id = ?
+  `;
+  return await pool.query(query, [userId]);
+};

@@ -115,3 +115,44 @@ exports.joinLike = async (req,res)=>{
   }
 }
 
+// 요일별 루틴 추가
+exports.addRoutineToSchedule = async (req, res) => {
+  const userId = req.user.id;
+  const { routineId, weekday } = req.body;
+
+  try {
+    await repository.addSchedule(userId, routineId, weekday);
+    res.json({ message: '요일 루틴 추가 완료' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: '서버 오류' });
+  }
+};
+
+exports.removeRoutineFromSchedule = async (req, res) => {
+  const userId = req.user.id;
+  const { routineId, weekday } = req.body;
+
+  try {
+    await repository.removeSchedule(userId, routineId, weekday);
+    res.json({ message: '요일 루틴 삭제 완료' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: '서버 오류' });
+  }
+};
+
+
+exports.getRoutinesByWeekday = async (req, res) => {
+  const userId = req.user.id;
+  const { weekday } = req.body; // GET /routines/weekday/3
+
+  try {
+    const [rows] = await repository.getRoutinesByWeekday(userId, weekday);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: '서버 오류' });
+  }
+};
+
