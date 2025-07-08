@@ -19,3 +19,17 @@ exports.getfollow =async(myId)=>{
 exports.isFollowing =async(myId,targetId)=>{
     return await pool.query(`SELECT * FROM follows WHERE follower_id = ? AND following_id = ?`,[myId,targetId]);
 }
+
+exports.countFollowers = async (userId) => {
+    return await pool.query(
+      `SELECT COUNT(*) AS count FROM follows WHERE following_id = ?`,
+      [userId]
+    );
+  };
+  
+  exports.countFollowings = async (userId) => {
+    return await pool.query(
+      `SELECT COUNT(*) AS count FROM follows WHERE follower_id = ?`,
+      [userId]
+    );
+  };

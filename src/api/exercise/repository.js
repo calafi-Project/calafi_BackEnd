@@ -57,3 +57,33 @@ exports.getMyExerciseSchedule = async (userId) => {
   `;
   return await pool.query(query, [userId]);
 };
+
+exports.getExerciseDetail = async (exerciseId) => {
+  const query = `
+    SELECT 
+      e.id AS exercise_id,
+      e.name,
+      e.description,
+      e.guide,
+      e.need,
+      e.image_url,
+      v.id AS video_id,
+      v.title AS video_title,
+      v.video_url,
+      v.created_at,
+      u.name AS creator_name,
+      u.profile_image AS creator_profile
+    FROM exercise_types e
+    LEFT JOIN exercise_videos v ON e.id = v.exercise_id
+    LEFT JOIN users u ON v.created_by = u.id
+    WHERE e.id = ?
+  `;
+  return await pool.query(query, [exerciseId]);
+};
+
+exports.addExerciseVideo = async (exercise_id, title, video_url, userId)=>{
+  const query = `
+    INSERT INTO exercise_videos (exercise_id, title, video_url, created_by) VALUES (?, ?, ?, ?)
+  `;
+  return await pool.query(query, [exercise_id, title, video_url, userId]);
+}

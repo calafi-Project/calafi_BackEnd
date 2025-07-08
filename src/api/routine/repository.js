@@ -32,7 +32,7 @@ exports.searchRoutine = async(searchTerm)=>{
 return await pool.query(query,[searchTerm]);
 }
 
-exports.routineDetail = async(routineId)=>{
+exports.routineDetail = async (routineId) => {
   const query = `
     SELECT 
         r.id AS routine_id,
@@ -43,8 +43,13 @@ exports.routineDetail = async(routineId)=>{
         u.profile_image AS author_profile_image,
         u.grade AS author_grade,
         ev.id AS video_id,
-        ev.title AS video_title,
-        ev.video_url AS video_url
+        ev.video_url AS video_url,
+        rd.custom_title,
+        rd.count,
+        CASE 
+          WHEN rd.count IS NOT NULL THEN CONCAT(rd.custom_title, ' X ', rd.count)
+          ELSE rd.custom_title
+        END AS detail_name
     FROM routines r
     JOIN users u ON r.user_id = u.id
     LEFT JOIN routine_details rd ON r.id = rd.routine_id
@@ -52,15 +57,18 @@ exports.routineDetail = async(routineId)=>{
     WHERE r.id = ?;
   `;
 
-  return await pool.query(query,[routineId]);
-}
+  return await pool.query(query, [routineId]);
+};
 
-exports.commentRoutine = async (routine_id, user_id, content) => {
+
+
+
+exports.commentRoutine = async (routine_id, userId, content) => {
   const query = `
       INSERT INTO routine_comments (routine_id, user_id, content)
       VALUES (?, ?, ?)
   `;
-  return await pool.query(query, [routine_id, user_id, content]);
+  return await pool.query(query, [routine_id, userId, content]);
 };
 
 exports.getCommentRoutine = async (routine_id) => {
@@ -103,22 +111,38 @@ exports.deletelike = async (routineId)=>{
   return await pool.query(query, [routineId]);
 }
 
-exports.joinLike = async (userId)=>{
+exports.joinLike = async (userId) => {
   const query = `
-  SELECT id, name, description, tags, likes, created_at FROM routines WHERE user_id = ?
+    SELECT r.id, r.name, r.description, r.tags, r.likes, r.created_at,
+           u.name AS authorName, u.profile_image AS authorProfile
+    FROM routines r
+    JOIN users u ON r.user_id = u.id
+    WHERE r.user_id = ?
   `;
   return await pool.query(query, [userId]);
-}
+};
 
-exports.joinlikeRoutine = async (userId)=>{
+exports.joinExercise = async (userId) => {
   const query = `
-  SELECT r.id, r.name, r.description, r.tags, r.likes, r.created_at
-     FROM routine_likes rl
-     JOIN routines r ON rl.routine_id = r.id
-     WHERE rl.user_id = ?
+    SELECT * 
+    FROM exercise_videos 
+    WHERE created_by = ?
+  `;
+  return await pool.query(query, [userId]); // [rows] 형태로 반환됨
+};
+exports.joinlikeRoutine = async (userId) => {
+  const query = `
+    SELECT r.id, r.name, r.description, r.tags, r.likes, r.created_at,
+           u.name AS authorName, u.profile_image AS authorProfile
+    FROM routine_likes rl
+    JOIN routines r ON rl.routine_id = r.id
+    JOIN users u ON r.user_id = u.id
+    WHERE rl.user_id = ?
   `;
   return await pool.query(query, [userId]);
-}
+};
+
+
 exports.addSchedule = async (userId, routineId, weekday) => {
   const query = `
     INSERT INTO weekly_routines (user_id, routine_id, weekday)
@@ -135,10 +159,57 @@ exports.removeSchedule = async (userId, routineId, weekday) => {
 };
 exports.getRoutinesByWeekday = async (userId, weekday) => {
   const query = `
-    SELECT r.*
+    SELECT r.*, u.name AS authorName, u.profile_image AS authorProfile
     FROM weekly_routines wr
     JOIN routines r ON wr.routine_id = r.id
+    JOIN users u ON r.user_id = u.id
     WHERE wr.user_id = ? AND wr.weekday = ?
   `;
   return await pool.query(query, [userId, weekday]);
+};
+
+
+exports.createRoutine = async (userId, name, description, tags) => {
+  const query = `INSERT INTO routines (user_id, name, description, tags) VALUES (?, ?, ?, ?)`;
+  const [result] = await pool.query(query, [userId, name, description, tags]);
+  return result.insertId; // insertId만 반환
+};
+
+exports.addVideosToRoutine = async (routineId, videoIdArray, countArray) => {
+  const getTitleQuery = `
+    SELECT title FROM exercise_videos WHERE id = ?
+  `;
+  const insertQuery = `
+    INSERT INTO routine_details (routine_id, video_id, custom_title, count)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  for (let i = 0; i < videoIdArray.length; i++) {
+    const videoId = videoIdArray[i];
+    const count = countArray[i] || 0;
+
+    const [rows] = await pool.query(getTitleQuery, [videoId]);
+    const title = rows[0]?.title || '제목 없음';
+
+    await pool.query(insertQuery, [routineId, videoId, title, count]);
+  }
+};
+
+
+
+exports.getRoutineDetailsByRoutineIds = async (routineIds) => {
+  const placeholders = routineIds.map(() => '?').join(',');
+  const query = `
+    SELECT 
+      ev.id,
+      ev.exercise_id,
+      ev.title,
+      ev.video_url,
+      ev.created_by,
+      ev.created_at
+    FROM exercise_videos ev
+    WHERE ev.id IN (${placeholders})
+    ORDER BY ev.id;
+  `;
+  return await pool.query(query, routineIds);
 };

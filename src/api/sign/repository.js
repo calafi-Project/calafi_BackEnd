@@ -9,9 +9,10 @@ exports.signUp = async (email, name, age, height, weight, password) => {
 
 exports.getId = async (email) => {
     const query = `SELECT id FROM users WHERE email = ?`;
-    const result = await pool.query(query, [email]);
-    return result[0]?.id;
+    const [rows] = await pool.query(query, [email]);
+    return rows[0]?.id;
 };
+
 
 exports.signAct = async (user_id) => {
     const query = `INSERT INTO userAct (user_id) VALUES (?)`;

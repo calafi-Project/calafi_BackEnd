@@ -2,8 +2,8 @@ const repository = require('./repository');
 
 exports.getExercise = async (req,res)=>{
     try{
-        const data = await repository.getExercise();
-        res.json(data);
+        const [rows] = await repository.getExercise();
+        res.json(rows);
     }catch(err){
         res.json(err);
     }
@@ -12,18 +12,19 @@ exports.getExercise = async (req,res)=>{
 exports.SearchExercise = async (req,res)=>{
     try{
         const {searchTerm} = req.body;
-        const data = await repository.searchExercise(searchTerm);
-        res.json(data);
+        const [rows] = await repository.searchExercise(searchTerm);
+        res.json(rows);
     }catch(err){
         res.json(err);
     }
 };
 
 exports.commentsExercise = async (req,res)=>{
+    const userId = req.user.id;
     try{
-        const {exercise_id,user_id,content}=req.body;
-        const data = await repository.commentExercise(exercise_id,user_id,content);
-        res.statusCode(200).json(data);
+        const {exercise_id,content}=req.body;
+        const [rows] = await repository.commentExercise(exercise_id,userId,content);
+        res.statusCode(200).json(rows);
     }
     catch(err)
     {
@@ -34,8 +35,8 @@ exports.commentsExercise = async (req,res)=>{
 exports.getCommentExercise=  async (req,res)=>{
     try{
         const { exercise_id } = req.body;
-        const data = await repository.getCommentExercise(exercise_id)
-        res.json(data);
+        const [rows] = await repository.getCommentExercise(exercise_id)
+        res.json(rows);
     }catch(err){
         res.json(err);
     }
@@ -81,4 +82,75 @@ exports.addExerciseToSchedule = async (req, res) => {
       res.status(500).json({ message: '서버 오류' });
     }
   };
-  
+exports.getExerciseDetail = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await repository.getExerciseDetail(id);
+
+    if (rows.length === 0) return res.status(404).json({ error: '운동을 찾을 수 없습니다.' });
+
+    // 운동 기본 정보
+    const exercise = {
+      id: rows[0].exercise_id,
+      name: rows[0].name,
+      description: rows[0].description,
+      guide: rows[0].guide,
+      need: rows[0].need,
+      image_url: rows[0].image_url,
+      videos: []
+    };
+
+    // 영상 정보 추가
+    rows.forEach(row => {
+      if (row.video_id) {
+        exercise.videos.push({
+          id: row.video_id,
+          title: row.video_title,
+          video_url: row.video_url,
+          created_at: row.created_at,
+          creator_name: row.creator_name,
+          creator_profile: row.creator_profile
+        });
+      }
+    });
+
+    res.json(exercise);
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류', detail: err });
+  }
+};
+
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  }
+});
+const upload = multer({ storage });
+
+exports.uploadVideoHandler = [
+  upload.single('video'), // 'video' 필드명과 맞춰야 함
+  async (req, res) => {
+    const { exercise_id, title } = req.body;
+    const userId = req.user.id;
+
+    if (!req.file) {
+      return res.status(400).json({ message: '영상 파일이 필요합니다.' });
+    }
+
+    // 업로드된 파일 경로 예: /uploads/1234567890.mp4
+    const video_url = `/uploads/${req.file.filename}`;
+
+    try {
+      await repository.addExerciseVideo(exercise_id, title, video_url, userId);
+      res.status(201).json({ message: "운동에 영상이 추가되었습니다." });
+    } catch (error) {
+      console.error("운동 영상 추가 오류:", error);
+      res.status(500).json({ message: "서버 오류" });
+    }
+  }
+];

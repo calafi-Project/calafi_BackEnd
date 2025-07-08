@@ -24,19 +24,19 @@ exports.unfollow = async (req,res)=>{
 }
 
 exports.getfollowing = async (req,res)=>{
-    const myId = parseInt(req.user.id);
+  const {myId} = req.body;
     try{
         
-        const rows =await repository.getfollowing(myId);
+        const [rows] =await repository.getfollowing(myId);
         res.json(rows);
     } catch (err) {
       res.status(500).json({ error: err });
     }
 }
 exports.getfollow = async (req,res)=>{
-    const myId = parseInt(req.user.id);
+    const {myId} = req.body;
     try{
-        const rows =await repository.getfollow(myId);
+        const [rows] =await repository.getfollow(myId);
         res.json(rows);
     } catch (err) {
       res.status(500).json({ error: err });
@@ -56,6 +56,20 @@ exports.isFollowing = async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ error: err });
+    }
+  };
+
+  exports.getFollowCount = async (req, res) => {
+    const {userId} = req.body;
+    try {
+      const [followers] = await repository.countFollowers(userId);
+      const [followings] = await repository.countFollowings(userId);
+      res.json({
+        followerCount: followers[0].count,
+        followingCount: followings[0].count,
+      });
+    } catch (err) {
+      res.status(500).json({ error: err });
     }
   };
   

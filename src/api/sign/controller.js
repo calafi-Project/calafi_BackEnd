@@ -10,6 +10,7 @@ exports.signUp = async (req, res) => {
         await repository.signUp(email, name, age, height, weight, hashPassword);
 
         const user_id = await repository.getId(email);
+        console.log('user_id:', user_id); // undefined거나 null이면 문제
 
         await repository.signAct(user_id);
 
